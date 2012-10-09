@@ -1,3 +1,12 @@
 enyo.depends(
+  "Count.js",
+  "Filters.js",
+  "NewTodo.js",
+  "ClearCompleted.js",
+  "Header.js",
+  "TodoList.js",
+  "TodoToggleAll.js",
+  "Footer.js",
+  "Main.js",
   "App.js"
 );

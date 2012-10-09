@@ -1,11 +1,24 @@
+// this controller is a view-controller it has awareness of
+// the view layer and organizes and controls it from the top-
+// mode layer of the application
+// the app controller can access its `$` as if it were the
+// application itself
 enyo.kind({
-  name: "App.AppController",
+  name: "Todo.AppController",
   kind: "enyo.ApplicationController",
-  handlers: {
-    ontap: "tapped"
+
+  beforeHandler: function (trigger) {
   },
-  tapped: function (inSender, inEvent) {
-    if (inSender.name === "hello")
-      App.$.hello.addContent("<br/><b>hello</b> control was tapped");
+
+  active: function () {
+    Todo.todos.set("filter", "active");
+  },
+  
+  completed: function () {
+    Todo.todos.set("filter", "completed");
+  },
+  
+  default: function () {
+    Todo.todos.set("filter", "all");
   }
 });

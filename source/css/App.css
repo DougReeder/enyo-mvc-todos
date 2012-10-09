@@ -1,10 +1,10 @@
-/*
-	Put anything you reference with "url()" in ../assets/
-	This way, you can minify your application, and just remove the "source" folder for production
-*/
-#App {
-  margin: 16px;
-  border-radius: 4px;
-  background-color: silver;
-  padding: 16px;
+body, body.enyo-unselectable.enyo-body-fit {
+  margin: 0 auto;
+  padding: 0;
+  height: auto;
+  background: #eaeaea url("../../assets/bg.png");
+}
+
+#todoapp {
+  overflow: visible;
 }
