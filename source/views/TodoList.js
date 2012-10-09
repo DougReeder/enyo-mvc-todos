@@ -84,8 +84,8 @@ enyo.kind({
   ],
   components: [
     {classes: "view", components: [
-      {name: "completed", bindProperty: "active", kind: "enyo.Checkbox", classes: "toggle"},
-      {name: "title", tag: "label"},
+      {bindProperty: "completed", bindTarget: "active", kind: "enyo.Checkbox", classes: "toggle"},
+      {name: "title", tag: "label", bindProperty: "title"},
       {kind: "Todo.DestroyButton", classes: "destroy"}]},
     {name: "editor", kind: "Todo.RowEditor", classes: "edit"}
   ],
