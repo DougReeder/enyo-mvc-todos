@@ -4,6 +4,6 @@ enyo.kind({
   id: "header",
   components: [
     {tag: "h1", content: "todos"},
-    {id: "new-todo", kind: "Todo.NewTodo"}
+    {id: "new-todo", kind: "Todo.Creator"}
   ]
 });

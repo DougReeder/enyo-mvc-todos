@@ -1,5 +1,5 @@
 enyo.kind({
-  name: "Todo.NewTodoController",
+  name: "Todo.CreatorController",
   kind: "enyo.Controller",
   handlers: {
     onkeyup: "keyup"
@@ -10,12 +10,4 @@ enyo.kind({
       this.owner.setNodeProperty("value", "");
     }
   }
-});
-
-enyo.kind({
-  name: "Todo.NewTodo",
-  kind: "enyo.Input",
-  classes: "todo-input",
-  placeholder: "What needs to be done?",
-  controller: "Todo.NewTodoController"
 });

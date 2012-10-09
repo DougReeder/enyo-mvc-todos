@@ -2,33 +2,14 @@ enyo.kind({
   name: "Todo.Filters",
   id: "filters",
   tag: "ul",
+  bindings: [
+    {from: "Todo.todos.filter", to: "$.all.filter", oneWay: true},
+    {from: "Todo.todos.filter", to: "$.active.filter", oneWay: true},
+    {from: "Todo.todos.filter", to: "$.completed.filter", oneWay: true}
+  ],
   components: [
-    {tag: "li", components: [
-      {kind: "Todo.FilterLink", bindings: [{from: "Todo.todos.filter", to: ".filter", oneWay: true}],
-        content: "All", match: "all"}]},
-    {tag: "li", components: [
-      {kind: "Todo.FilterLink", bindings: [{from: "Todo.todos.filter", to: ".filter", oneWay: true}],
-        content: "Active", target: "active"}]},
-    {tag: "li", components: [
-      {kind: "Todo.FilterLink", bindings: [{from: "Todo.todos.filter", to: ".filter", oneWay: true}],
-        content: "Completed", target: "completed"}]}
+    {tag: "li", components: [{kind: "Todo.FilterLink", content: "All", match: "all", name: "all"}]},
+    {tag: "li", components: [{kind: "Todo.FilterLink", content: "Active", target: "active", name: "active"}]},
+    {tag: "li", components: [{kind: "Todo.FilterLink", content: "Completed", target: "completed", name: "completed"}]}
   ]
-});
-
-enyo.kind({
-  name: "Todo.FilterLink",
-  tag: "span",
-  published: {
-    filter: null,
-    match: null,
-    target: null
-  },
-  tap: function () {
-    Todo.router.route(this.get("target") || "");
-    return true;
-  },
-  filterChanged: function () {
-    var f = this.filter, t = this.match || this.target;
-    this.addRemoveClass("selected", f === t);
-  }
 });
