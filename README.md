@@ -1,6 +1,5 @@
-bootplate
-=========
+### Enyo.js MVC Case Study
 
-Application template for packaged Enyo
+This is a test-case for the MVC-pattern* in Enyo.js applications.
 
-Refer to the [Wiki](https://github.com/enyojs/enyo/wiki/Bootplate) for how to get started.
+_*MVC as defined by a client-side separation of logical entities, often at the developers discretion as this is simply a collection of tools on top of the frameowrk by which one could implememnt an application_
