@@ -2,24 +2,30 @@ enyo.kind({
   name: "Todo.TodosCollection",
   kind: "enyo.Collection",
   model: "Todo.TodoModel",
+  
   collectionProperties: {
     localStorage: new Store("todos-enyo"),
-    completed: function () {
-      return this.filter(function (todo) {
-        return todo.get("completed");
-      });
-    },
-    remaining: function () {
-      return this.without.apply(this, this.completed());
-    },
-    nextOrder: function () {
-      if (!this.length) {
-        return 1;
-      }
-      return this.last().get("order") + 1;
-    },
-    comparator: function (todo) {
-      return todo.get("order");
-    }
+  },
+  
+  completed: enyo.Computed(function () {
+    return enyo.filter(this.content, function (model) {
+      return model.get("completed");
+    });
+  }),
+  
+  remaining: enyo.Computed(function () {
+   return enyo.filter(this.content, function (model) {
+     return !model.get("completed");
+   });
+  }),
+  
+  didAdd: function (model) {
+    model.save();
+    this.inherited(arguments);
+  },
+  
+  didRemove: function (model) {
+    model.destroy();
+    this.inherited(arguments);
   }
 });

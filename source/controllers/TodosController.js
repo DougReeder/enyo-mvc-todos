@@ -60,6 +60,7 @@ enyo.kind({
     }
     this.startNotifications();
   },
+  
   clearCompleted: function () {
     this.remove(this.get("completed"));
   }

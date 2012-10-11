@@ -8,7 +8,6 @@ enyo.kind({
     onEditorBlurred: "enterPressed"
   },
   published: {
-    completedToggled: null,
     isEditing: false
   },
   destroyTapped: function () {
