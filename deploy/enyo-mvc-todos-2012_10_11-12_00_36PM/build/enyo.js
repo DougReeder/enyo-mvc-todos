@@ -516,31 +516,28 @@ enyo.bindingCount++, this.bindId = getBindingsId(), this._setup();
 enyo.bindingCount = 0, enyo.bindingsId = 0;
 var e, t, n;
 e = function(e, t) {
-var n = t ? t : this.owner, r, i, s, o, u;
-r = e.lastIndexOf(".");
-if (r === 0) return {
+var n = t ? t : this.owner, r, i, s, o, u, a;
+r = e.lastIndexOf("."), r === 0 && (a = {
 base: n,
 property: e.slice(1)
-};
-if (r === -1) return {
+}), r === -1 && (a = {
 base: n,
 property: e
-};
-s = e.slice(0, r), o = e.slice(r + 1);
+}), s = e.slice(0, r), o = e.slice(r + 1);
 if (s[0] === "." || !(i = enyo._getPath(s))) i = enyo._getPath.call(n, s);
 if (i && !i.addObserver) {
 r = s.lastIndexOf("."), u = s.substring(r + 1, s.length), s = s.substring(0, r);
 if (s[0] === "." || !(i = enyo._getPath(s))) i = enyo._getPath.call(n, s);
-if (i && i[u] && enyo.isFunction(i[u]) && i[u].isProperty) return {
+i && i[u] && enyo.isFunction(i[u]) && i[u].isProperty && (a = {
 base: i,
 property: o,
 computed: u
-};
+});
 }
-return {
+return a = a ? a : {
 base: i,
 property: o
-};
+}, a.base || (a.base = n), a;
 }, getBindingsId = function() {
 return String(enyo.bindingsId++);
 }, t = function(e) {
@@ -555,22 +552,25 @@ _sourceResponder: null,
 _sourceComputedProperty: null,
 _waiting: null,
 _setup: function() {
-if (!this._setupSource() || !this._setupTarget()) return;
+var e = this._setupSource(), t = this._setupTarget();
+if (!e || !t) return;
 this.autoConnect === !0 && this.connect(), this.autoSync === !0 && this.sync();
 },
 _setupSource: function() {
 var t = e.call(this, this.from, this.source), n, r, i;
-return n = t.base, r = t.property, i = t.computed, !n || n[r] === undefined && !i ? !1 : (this._source = n, this._sourceProperty = r, this._sourceComputedProperty = i, !0);
+return n = t.base, r = t.property, i = t.computed, n ? (this._source = n, this._sourceProperty = r, this._sourceComputedProperty = i, !0) : !1;
 },
 _setupTarget: function() {
 var t = e.call(this, this.to, this.target), n, r;
-return n = t.base, r = t.property, !n || n[r] === undefined ? !1 : (this._target = n, this._targetProperty = r, !0);
+return n = t.base, r = t.property, n ? (this._target = n, this._targetProperty = r, !0) : !1;
 },
 _connectSource: function() {
 var e = this._source, t = this._sourceProperty, n = this._sourceResponder, r = this._sourceComputedProperty;
 if (!n || !enyo.isFunction(n)) n = this._sourceResponder = enyo.bind(this, this._syncFromSource);
 if (!e) return !1;
-n.bindId = this.bindId, r && (this.oneWay = !0), e.addObserver(r || t, n);
+n.bindId = this.bindId;
+var i = n;
+r && (this.oneWay = !0), e.addObserver(r || t, n);
 },
 _connectTarget: function() {
 var e = this._target, t = this._targetProperty, n = this._targetResponder;
@@ -618,7 +618,7 @@ this._target.removeObserver(this._targetProperty, this._targetResponder);
 },
 suspend: function() {},
 getTargetValue: function() {
-var e = enyo._getPath.call(this._target, this._targetProperty);
+var e = this._target.get(this._targetProperty);
 return e instanceof Object && (e = t(e)), e;
 },
 setTargetValue: function(e) {
@@ -627,7 +627,7 @@ return this.isSynced = !0, this._target.set(this._targetProperty, t);
 },
 getSourceValue: function() {
 var e, n = this._sourceProperty, r = this._sourceComputedProperty;
-return r ? e = enyo._getPath.call(this._source, r)[n] : e = enyo._getPath.call(this._source, this._sourceProperty), e instanceof Object && (e = t(e)), e;
+return r ? e = this._source.get(r)[n] : e = this._source.get(this._sourceProperty), e instanceof Object && (e = t(e)), e;
 },
 setSourceValue: function(e) {
 var t = this.transform && enyo.isFunction(this.transform) ? this.transform(e, "source") : e;

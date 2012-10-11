@@ -3787,34 +3787,31 @@ model: t.model
 },
 fetch: function(t) {
 t = t ? t : {};
-var n = enyo.bind(this, this._didFetch, t.success);
-t.success = n, t.error = enyo.bind(this, this._didError, t.error), this.set("status", e.LOADING), this._collection.fetch(t);
+var n = enyo.bind(this, this.didFetch, t.success);
+t.success = n, t.error = enyo.bind(this, this.didError, t.error), this.set("status", e.LOADING), this._collection.fetch(t);
 },
-_didFetch: function(t) {
+didFetch: function(t) {
 this.stopNotifications(), this.set("content", this._collection.models), this.set("length", this._collection.length), this.set("status", e.OK), this.startNotifications(), t && enyo.isFunction(collback) && t.apply(this, enyo.toArray(arguments).slice(1));
 },
-_didError: function(t) {
+didError: function(t) {
 this.set("status", e.ERROR), t && enyo.isFunction(t) && t.apply(this, enyo.toArray(arguments).slice(1));
 },
-_didUpdate: function(e, t, n) {
-var r = this._collection, i;
-this.stopNotifications();
-switch (e) {
-case "add":
-this.set("content", r.models), this.set("length", r.length), this.startNotifications(), t.save();
-break;
-case "remove":
-i = this.content, t.destroy(), this.set("content", r.models), this.set("length", r.length), this.startNotifications(), this.notifyObservers("content", i, this.content);
-break;
-case "change":
-i = this.content, this.set("content", r.models), this.set("length", r.length), this.startNotifications(), this.notifyObservers("content", i, this.content);
-}
+didAdd: function(e, t) {
+this.stopNotifications(), this.set("content", t.models), this.set("length", t.length), this.startNotifications();
+},
+didRemove: function(e, t, n) {
+var r = this.content;
+this.stopNotifications(), this.content = t.models, this.set("length", t.length), this.startNotifications(), this.notifyObservers("content", r, this.content);
+},
+didChange: function(e, t) {
+var n = this.content;
+this.stopNotifications(), this.content = e.collection.models, this.set("length", e.collection.length), this.startNotifications(), this.notifyObservers("content", n, this.content);
 },
 setupObservers: function() {
-var e = this._collection, t = this._responder;
-e.on("add", enyo.bind(this, this._didUpdate, "add")), e.on("remove", enyo.bind(this, this._didUpdate, "remove")), e.on("change", enyo.bind(this, this._didUpdate, "change"));
+var e = this._collection;
+e.on("add", enyo.bind(this, this.didAdd)), e.on("remove", enyo.bind(this, this.didRemove)), e.on("change", enyo.bind(this, this.didChange));
 },
-methods: [ "toJSON", "sync", "add", "remove", "push", "pop", "unshift", "shift", "slice", "getByCid", "at", "where", "sort", "pluck", "reset", "create", "parse", "clone", "chain" ]
+methods: [ "toJSON", "sync", "add", "remove", "push", "pop", "unshift", "shift", "slice", "getByCid", "at", "where", "sort", "pluck", "reset", "create", "parse", "clone", "chain", "without", "filter", "last" ]
 });
 })();
 
@@ -3882,28 +3879,38 @@ this.inherited(arguments), this.modelChanged();
 },
 modelChanged: function() {
 var e = 0, t, n, r = this.model, i = {};
-if (!r || this._lastModel === this.model) return;
-this._lastModel = this.model, t = this.attributes = enyo.keys(r.attributes);
-for (; e < t.length; ++e) n = t[e], this[n] = enyo.Computed(enyo.bind(this, function(e, t) {
-return arguments.length === 2 ? (r.save(e, t, {
-wait: !0
-}), this) : r.get(e);
-}, n));
-r.on("change", enyo.bind(this, this._didUpdate)), r.on("destroy", enyo.bind(this, this._didDestroy));
-for (e = 0; e < t.length; ++e) i[t[e]] = !0;
-r.changed = i, this._didUpdate(r);
+if (!r || this.lastModel === r) return;
+this.lastModel = r, r.on("change", this._updateResponder = enyo.bind(this, this.didUpdate)), r.on("destroy", this._destroyResponder = enyo.bind(this, this.didDestroy));
 },
-_didUpdate: function(e) {
-var t, n, r = e.changed;
-t = enyo.keys(r);
-if (t && t.length > 0) while (t.length) n = t.shift(), this.notifyObservers(n, this.get(n), e.get(n));
+didUpdate: function(e) {
+var t, n = e.changedAttributes();
+t = n ? enyo.keys(n) : !1;
+if (t && t.length) {
+this.stopNotifications();
+while (t.length) c = t.shift(), this.notifyObservers(c, e.previous(c), e.get(c));
+this.startNotifications();
+}
 },
-_didDestroy: function() {
-this.destroy();
+didDestroy: function() {
+this.removeModel();
+},
+removeModel: function() {
+var e = this.model;
+e && (e.off("change", this._updateResponder), e.off("destroy", this._destroyResponder)), this.model = null;
 },
 destroy: function() {
-var e = this.model;
-e && (e.off("change", enyo.bind(this, this._didUpdate)), e.off("destroy", enyo.bind(this, this._didDestroy))), this.model = null, this.inherited(arguments);
+this.removeModel(), this.inherited(arguments);
+},
+get: function() {
+var e;
+if (this.model) {
+e = this.model.get.apply(this.model, arguments);
+if (e) return e;
+}
+return this.inherited(arguments);
+},
+set: function(e, t) {
+return this.model && e in this.model.attributes ? (this.model.set(e, t), this) : this.inherited(arguments);
 }
 });
 
@@ -4009,10 +4016,11 @@ if (!e) return;
 for (r in this.$) {
 if (!this.$.hasOwnProperty(r)) continue;
 t = this.$[r], n = t.bindProperty;
-if (!n || !(n in e)) continue;
+if (!n) continue;
 this._autoBinding({
-from: ".controller." + n,
+from: "." + n,
 to: this.getBindTargetFor(t),
+source: e,
 target: t
 });
 }
@@ -4114,21 +4122,23 @@ name: "Todo.TodosCollection",
 kind: "enyo.Collection",
 model: "Todo.TodoModel",
 collectionProperties: {
-localStorage: new Store("todos-enyo"),
-completed: function() {
-return this.filter(function(e) {
+localStorage: new Store("todos-enyo")
+},
+completed: enyo.Computed(function() {
+return enyo.filter(this.content, function(e) {
 return e.get("completed");
 });
+}),
+remaining: enyo.Computed(function() {
+return enyo.filter(this.content, function(e) {
+return !e.get("completed");
+});
+}),
+didAdd: function(e) {
+e.save(), this.inherited(arguments);
 },
-remaining: function() {
-return this.without.apply(this, this.completed());
-},
-nextOrder: function() {
-return this.length ? this.last().get("order") + 1 : 1;
-},
-comparator: function(e) {
-return e.get("order");
-}
+didRemove: function(e) {
+e.destroy(), this.inherited(arguments);
 }
 });
 
@@ -4209,7 +4219,6 @@ onEnterPressed: "enterPressed",
 onEditorBlurred: "enterPressed"
 },
 published: {
-completedToggled: null,
 isEditing: !1
 },
 destroyTapped: function() {
@@ -4524,7 +4533,7 @@ components: [ {
 classes: "view",
 components: [ {
 bindProperty: "completed",
-bindTarget: "active",
+bindTarget: "checked",
 kind: "enyo.Checkbox",
 classes: "toggle"
 }, {
